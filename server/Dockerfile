@@ -5,15 +5,14 @@ FROM node:18 as build-stage
 # If you want to change the port of mediasoup-server you have also to change this var as it is used in mediasoup-client in urlFactory.js for the wss connection to the server
 ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
 ENV MEDIASOUP_CLIENT_ENABLE_ICESERVER=yes
-ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:100.100.100.100:3478?transport=udp
+ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:65.108.192.13:3478?transport=udp
 ENV MEDIASOUP_CLIENT_ICESERVER_USER=user
 ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
 
-
-RUN echo $MEDIASOUP_CLIENT_ENABLE_ICESERVER
 WORKDIR /app
 COPY ./app/package*.json /app/
 RUN npm install -g gulp-cli
+# Needed to run with node:18
 RUN npm install --legacy-peer-deps
 COPY ./app/ /app/
 
