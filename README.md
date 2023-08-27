@@ -269,3 +269,28 @@ mediasoup_1  | }
 ```
 
 > Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the traffic will be relayed via the public ip of coturn.
+
+- Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
+
+![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/a95d23af-bf3b-4c7f-8685-383987c6901e)
+
+- Open chrome://webrtc-internals/ in chrome the two webrtc stream should be like this
+
+```
+- ICE connection state: new => completed
+Connection state: new => connected
+Signaling state: new => stable
+ICE Candidate pair: 172.19.0.2:55286 <=> 172.19.0.3:44444
+```
+> The ip address should be the private ip address of the mediasoup and coturn container
+
+- The Ice candidate grid should look like this
+  
+![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/f0e9e518-4dc0-4d50-92d2-048c3cf6698b)
+
+- In the Mediasoup client demo app click on the link **Invitation Link** and open this link from another computer or you mobile phone
+
+- Both device should be in the Room
+
+
+
