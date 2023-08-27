@@ -73,9 +73,12 @@ services:
 - config.js file that work with Docker
 
 
-## How to change the tcp port (Web app and WSS)
+## How to change the tcp port (Web app and WSS).
+
 This need to be changed in the frontend mediasoup-client and in the backend at the same time.
+
 For the server the port configured in server/config.js with the environement variable PROTOO_LISTEN_PORT.
+
 In the client code (server/app/lib/urlFactory.js) there is a variable called protooPort that can only be changed before building the mediasoup-client files.
 
 - Change the port for the mediasoup-client (used for the WSS requests), replace 4443 with the port you want to use (for a "real" deplyonent it should be 443)
