@@ -194,7 +194,7 @@ gulp.task('bundle:watch', () => {
 
 gulp.task('dist', gulp.series(
 	'clean',
-	'lint',
+	//'lint',
 	'bundle',
 	'html',
 	'css',

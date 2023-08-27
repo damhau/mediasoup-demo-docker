@@ -151,7 +151,7 @@ module.exports =
 			minimumAvailableOutgoingBitrate: 600000,
 			maxSctpMessageSize: 262144,
 			// Additional options that are not part of WebRtcTransportOptions.
-			maxIncomingBitrate: 1500000
+			maxIncomingBitrate: 5000000
 		},
 		// mediasoup PlainTransport options for legacy RTP endpoints (FFmpeg,
 		// GStreamer).
