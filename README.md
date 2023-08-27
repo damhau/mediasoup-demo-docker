@@ -1,4 +1,4 @@
-# mediasoup-demo v3 with Turn
+# Mediasoup-demo v3 - Docker and Turn Server
 
 This is a fork of the demo application of [mediasoup](https://mediasoup.org) **v3**.
 
@@ -13,6 +13,10 @@ The goal is to have a sample that worf for the deployment of the Mediasoup demo 
 - Docker and Docker Compose
 - A turn server running in a container with port 3478 forwarded from the public ip (this is configured in docker)
 - A mediasoup server running in a container with port 4443 forwarded from the public ip (this is configured in docker)
+
+## Diagram
+
+![Alt text](image.png)
 
 ## Modification
 
