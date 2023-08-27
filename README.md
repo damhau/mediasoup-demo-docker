@@ -30,7 +30,7 @@ Below are the modification that I've done starting from [mediasoup-demo](https:/
 - add a start.sh file for the dockerimage, this is a simple script that will gather the ip "inside" of the container and use it for MEDIASOUP_ANNOUNCED_IP
 > This is only needed for docker if you don't use net=host or for Kubernetes
 
-- add the following in server.js in the function "async function createExpressApp()" to server the mediasoup-client file
+- add the following in server.js in the function "async function createExpressApp()" to serve the mediasoup-client file
 
 ```
 147:	expressApp.use(express.static('public'))
