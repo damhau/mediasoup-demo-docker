@@ -16,7 +16,7 @@ The goal is to have a sample that worf for the deployment of the Mediasoup demo 
 
 ## Diagram
 
-![Alt text](image.png)
+![Alt text](docs/image.png)
 
 ## Modification
 
@@ -74,6 +74,22 @@ services:
 
 ## How to build
 
+
+- Clone the repo and change the ip address of the turn server from 100.100.100.100 to your public ip
+
+```
+git clone https://github.com/damhau/mediasoup-demo-docker
+vi server/app/lib/RoomClient.js
+
+2130: iceServers: [
+2131:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
+2132: ],
+...
+2241: iceServers: [
+2242:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
+2243: ],
+```
+
 - Run docker build in the server folder
 
 ```
@@ -84,16 +100,8 @@ docker build . -t mediasoup-demo-docker
 
 > if the start.sh script fail to detec the container ip you can change the Dockerfile and replace CMD ["sh", "/service/start.sh"] with CMD ["node", "/service/server.js"] and set the variable MEDIASOUP_ANNOUNCED_IP manually
 
+
 ## How to run
-
-
-- Clone the repo and change the ip address of the turn server from 100.100.100.100 to your public ip
-
-```
-git clone https://github.com/damhau/mediasoup-demo-docker
-vi server/app/lib/RoomClient.js
-```
-
 
 - Run docker-compose up in the server folder
 
