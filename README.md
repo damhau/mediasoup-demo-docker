@@ -36,7 +36,7 @@ Below are the modification that I've done starting from [mediasoup-demo](https:/
 147:	expressApp.use(express.static('public'))
 ```
 
-- added logic server/app/lib/RoomClient.js to configure a turn server and in server/app/gulpfile.js when the following varaibles are configured in the Dockerfile stage 0
+- added a simple if/else in server/app/lib/RoomClient.js to configure a turn server. The turn server will be used by the mediasoup client when when the following varaibles are configured in the Dockerfile stage 0.
   
 ```
 ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
