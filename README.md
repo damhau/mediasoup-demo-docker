@@ -272,7 +272,8 @@ mediasoup_1  | }
 
 - Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
 
-![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/a95d23af-bf3b-4c7f-8685-383987c6901e)
+![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/41d8b667-7382-4ecf-b1d8-2179d8328b0c)
+
 
 - Open chrome://webrtc-internals/ in chrome the two webrtc stream should be like this
 
