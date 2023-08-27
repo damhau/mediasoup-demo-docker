@@ -103,6 +103,15 @@ docker build . -t mediasoup-demo-docker
 
 ## How to run
 
+- Edit server/docker-compose.yml and udpate the docker image for mediasoup with your own (otherwise it will use my turn server and it will not work)
+
+```
+git clone https://github.com/damhau/mediasoup-demo-docker
+cd server
+vi docker-compose.yml
+replace image: damienh/mediasoup:v1.31-slim with your image
+```
+
 - Run docker-compose up in the server folder
 
 ```
