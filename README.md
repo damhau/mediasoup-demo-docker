@@ -27,7 +27,7 @@ Below are the modification that I've done starting from [mediasoup-demo](https:/
   - stage 0: run gulp dist to create the frontend app file (they will be served by nodejs from the backend)
   - stage 1: build the image for the mediasoup-server and copy the mediasoup-client file
 
-- added a start.sh file for the dockerimage, this is a simple script that will gather the ip "inside" of the container and use it for MEDIASOUP_ANNOUNCED_IP
+- added a start.sh file for the dockerimage, this is a simple script that will gather the ip "inside" of the container and use it for MEDIASOUP_ANNOUNCED_IP then start node /service/server.js
 > This is only needed for docker if you don't use net=host or for Kubernetes
 
 - added the following in server.js in the function "async function createExpressApp()" to serve the mediasoup-client file
