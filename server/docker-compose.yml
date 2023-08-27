@@ -1,6 +1,6 @@
 services:
   mediasoup:
-    image: damienh/mediasoup:v1.31-slim
+    image: mediasoup-demo-docker
     ports:
       - '4443:4443'
   coturn:
