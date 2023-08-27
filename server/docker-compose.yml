@@ -1,0 +1,19 @@
+services:
+  mediasoup:
+    image: damienh/mediasoup:v1.31-slim
+    ports:
+      - '4443:4443'
+  coturn:
+    image: coturn/coturn
+    command: -n --log-file=stdout --lt-cred-mech --fingerprint --no-multicast-peers --no-cli --no-tlsv1 --no-tlsv1_1 --realm=my.realm.org --user user:pass -v
+    ports:
+      ## STUN/TURN
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "3479:3479"
+      - "3479:3479/udp"
+      ## STUN/TURN SSL
+      - "5349:5349"
+      - "5349:5349/udp"
+      - "5350:5350"
+      - "5350:5350/udp"
