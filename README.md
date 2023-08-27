@@ -299,7 +299,7 @@ mediasoup_1  | }
 
 ## How to test
 
-> Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the traffic will be relayed via the public ip of coturn.
+> Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the media traffic will be relayed via the public ip of coturn.
 
 - Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
 
