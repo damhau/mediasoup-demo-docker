@@ -77,7 +77,7 @@ services:
 
 This need to be changed in the frontend mediasoup-client and in the backend at the same time.
 
-For the server the port configured in server/config.js with the environement variable PROTOO_LISTEN_PORT.
+For the server, the port configured in server/config.js with the environement variable PROTOO_LISTEN_PORT.
 
 In the client code (server/app/lib/urlFactory.js) there is a variable called protooPort that can only be changed before building the mediasoup-client files.
 
