@@ -98,7 +98,7 @@ cd server
 docker build . -t mediasoup-demo-docker
 ```
 
-> if the start.sh script fail to detec the container ip you can change the Dockerfile and replace CMD ["sh", "/service/start.sh"] with CMD ["node", "/service/server.js"] and set the variable MEDIASOUP_ANNOUNCED_IP manually
+> if the start.sh script fail to detect the container ip you can change the Dockerfile and replace CMD ["sh", "/service/start.sh"] with CMD ["node", "/service/server.js"] and set the variable MEDIASOUP_ANNOUNCED_IP manually
 
 
 ## How to run
