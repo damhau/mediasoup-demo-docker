@@ -22,33 +22,33 @@ The goal is to have a sample that work for the deployment of the Mediasoup demo 
 
 Below are the modification that I've done starting from [mediasoup-demo](https://github.com/versatica/mediasoup-demo/) 
 
-- Add a multistage Dockerfile
+- Added a multistage Dockerfile
 
   - stage 0: run gulp dist to create the frontend app file (they will be served by nodejs from the backend)
   - stage 1: build the image for the mediasoup-server and copy the mediasoup-client file
 
-- add a start.sh file for the dockerimage, this is a simple script that will gather the ip "inside" of the container and use it for MEDIASOUP_ANNOUNCED_IP
+- added a start.sh file for the dockerimage, this is a simple script that will gather the ip "inside" of the container and use it for MEDIASOUP_ANNOUNCED_IP
 > This is only needed for docker if you don't use net=host or for Kubernetes
 
-- add the following in server.js in the function "async function createExpressApp()" to serve the mediasoup-client file
+- added the following in server.js in the function "async function createExpressApp()" to serve the mediasoup-client file
 
 ```
 147:	expressApp.use(express.static('public'))
 ```
 
-- add the following settings in server/app/lib/RoomClient.js to configure a turn server (you have to replace 100.100.100.100 with the ip address or fqdn of your turn server)
-
+- added logic server/app/lib/RoomClient.js to configure a turn server and in server/app/gulpfile.js when the following varaibles are configured in the Dockerfile stage 0
+  
 ```
-2130: iceServers: [
-2131:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
-2132: ],
-...
-2241: iceServers: [
-2242:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
-2243: ],
+ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
+ENV MEDIASOUP_CLIENT_ENABLE_ICESERVER=yes
+ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:100.100.100.100:3478?transport=udp
+ENV MEDIASOUP_CLIENT_ICESERVER_USER=user
+ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
 ```
 
-- add a sample docker-compose file that start mediasoup and coturn
+> the variable are replaced in the .js when the command gulp dist is executed, the config of gulp is in server/app/gulpfile.js line 97 to 103. After the variable are replaced in the .js file they are bundled and stored in the folder /service/public in the stage 1 docker build.
+
+- added a sample docker-compose file that start mediasoup and coturn
 
 ```
 services:
@@ -67,7 +67,7 @@ services:
 > As you can see there only port 4443 is "open" for Mediasoup and port 3478 for Coturn. This mean that all the webrtc media traffic is over udp 3478. This is a pre-requiste to be able to run this on Kubernetes without network=host and with a turn server like stunner.
 
 
-- Add a cert folder with self signed demo certificate in server/certs 
+- Added a cert folder with self signed demo certificate in server/certs 
 > you should replace the cert with your own
 
 - config.js file that work with Docker
@@ -79,16 +79,15 @@ services:
 
 ```
 git clone https://github.com/damhau/mediasoup-demo-docker
-vi server/app/lib/RoomClient.js
+vi server/Dockerfile
 
-2130: iceServers: [
-2131:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
-2132: ],
-...
-2241: iceServers: [
-2242:    { "urls": "turn:100.100.100.100:3478?transport=udp", "username": "user", "credential": "pass" }
-2243: ],
+ENV MEDIASOUP_CLIENT_ENABLE_ICESERVER=yes
+ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:100.100.100.100:3478?transport=udp
+ENV MEDIASOUP_CLIENT_ICESERVER_USER=user
+ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
 ```
+
+> if you don't want to enable turn juste remove the 4 line
 
 - Run docker build in the server folder
 

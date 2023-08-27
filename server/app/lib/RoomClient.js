@@ -2094,6 +2094,12 @@ export default class RoomClient {
 			}
 			// Create mediasoup Transport for sending (unless we don't want to produce).
 			if (this._produce) {
+
+				let enableIceServer = process.env.MEDIASOUP_CLIENT_ENABLE_ICESERVER
+				let iceServerUrl = process.env.MEDIASOUP_CLIENT_ICESERVER_URL
+				let iceServerUser = process.env.MEDIASOUP_CLIENT_ICESERVER_USER
+				let iceServerPass = process.env.MEDIASOUP_CLIENT_ICESERVER_PASS
+
 				const transportInfo = await this._protoo.request(
 					'createWebRtcTransport',
 					{
@@ -2113,28 +2119,52 @@ export default class RoomClient {
 					sctpParameters
 				} = transportInfo;
 
-				this._sendTransport = this._mediasoupDevice.createSendTransport(
-					{
-						id,
-						iceParameters,
-						iceCandidates,
-						dtlsParameters:
+
+				if (enableIceServer === 'yes')
+					this._sendTransport = this._mediasoupDevice.createSendTransport(
 						{
-							...dtlsParameters,
-							// Remote DTLS role. We know it's always 'auto' by default so, if
-							// we want, we can force local WebRTC transport to be 'client' by
-							// indicating 'server' here and vice-versa.
-							role: 'auto'
-						},
-						sctpParameters,
-						iceServers: [
-							{ "urls": "turn:65.108.192.13:3478?transport=udp", "username": "user", "credential": "pass" }
-						],
-						iceTransportPolicy: 'relay',
-						proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
-						additionalSettings:
-							{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
-					});
+							id,
+							iceParameters,
+							iceCandidates,
+							dtlsParameters:
+							{
+								...dtlsParameters,
+								// Remote DTLS role. We know it's always 'auto' by default so, if
+								// we want, we can force local WebRTC transport to be 'client' by
+								// indicating 'server' here and vice-versa.
+								role: 'auto'
+							},
+							sctpParameters,
+							iceServers: [
+								{ "urls": iceServerUrl, "username": iceServerUser, "credential": iceServerPass }
+							],
+							iceTransportPolicy: 'relay',
+							proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
+							additionalSettings:
+								{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
+						});
+				else
+					this._sendTransport = this._mediasoupDevice.createSendTransport(
+						{
+							id,
+							iceParameters,
+							iceCandidates,
+							dtlsParameters:
+							{
+								...dtlsParameters,
+								// Remote DTLS role. We know it's always 'auto' by default so, if
+								// we want, we can force local WebRTC transport to be 'client' by
+								// indicating 'server' here and vice-versa.
+								role: 'auto'
+							},
+							sctpParameters,
+							iceServers: [],
+							proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
+							additionalSettings:
+								{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
+						});
+
+
 
 				this._sendTransport.on(
 					'connect', ({ dtlsParameters }, callback, errback) => // eslint-disable-line no-shadow
@@ -2205,6 +2235,12 @@ export default class RoomClient {
 
 			// Create mediasoup Transport for receiving (unless we don't want to consume).
 			if (this._consume) {
+
+				let enableIceServer = process.env.MEDIASOUP_CLIENT_ENABLE_ICESERVER
+				let iceServerUrl = process.env.MEDIASOUP_CLIENT_ICESERVER_URL
+				let iceServerUser = process.env.MEDIASOUP_CLIENT_ICESERVER_USER
+				let iceServerPass = process.env.MEDIASOUP_CLIENT_ICESERVER_PASS
+
 				const transportInfo = await this._protoo.request(
 					'createWebRtcTransport',
 					{
@@ -2224,27 +2260,50 @@ export default class RoomClient {
 					sctpParameters
 				} = transportInfo;
 
-				this._recvTransport = this._mediasoupDevice.createRecvTransport(
-					{
-						id,
-						iceParameters,
-						iceCandidates,
-						dtlsParameters:
+				if (enableIceServer === 'yes')
+
+					this._recvTransport = this._mediasoupDevice.createRecvTransport(
 						{
-							...dtlsParameters,
-							// Remote DTLS role. We know it's always 'auto' by default so, if
-							// we want, we can force local WebRTC transport to be 'client' by
-							// indicating 'server' here and vice-versa.
-							role: 'auto'
-						},
-						sctpParameters,
-						iceServers: [
-							{ "urls": "turn:65.108.192.13:3478?transport=udp", "username": "user", "credential": "pass" }
-						],
-						iceTransportPolicy: 'relay',
-						additionalSettings:
-							{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
-					});
+							id,
+							iceParameters,
+							iceCandidates,
+							dtlsParameters:
+							{
+								...dtlsParameters,
+								// Remote DTLS role. We know it's always 'auto' by default so, if
+								// we want, we can force local WebRTC transport to be 'client' by
+								// indicating 'server' here and vice-versa.
+								role: 'auto'
+							},
+							sctpParameters,
+							iceServers: [
+								{ "urls": iceServerUrl, "username": iceServerUser, "credential": iceServerPass }
+							],
+							iceTransportPolicy: 'relay',
+							additionalSettings:
+								{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
+						});
+
+				else
+
+					this._recvTransport = this._mediasoupDevice.createRecvTransport(
+						{
+							id,
+							iceParameters,
+							iceCandidates,
+							dtlsParameters:
+							{
+								...dtlsParameters,
+								// Remote DTLS role. We know it's always 'auto' by default so, if
+								// we want, we can force local WebRTC transport to be 'client' by
+								// indicating 'server' here and vice-versa.
+								role: 'auto'
+							},
+							sctpParameters,
+							iceServers: [],
+							additionalSettings:
+								{ encodedInsertableStreams: this._e2eKey && e2e.isSupported() }
+						});
 
 				this._recvTransport.on(
 					'connect', ({ dtlsParameters }, callback, errback) => // eslint-disable-line no-shadow
