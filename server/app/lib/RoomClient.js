@@ -48,6 +48,12 @@ export default class RoomClient {
 			enableWebcamLayers,
 			enableSharingLayers,
 			webcamScalabilityMode,
+			// Try to add turn config
+			enableIceServer,
+			iceServerUrl,
+			iceServerUser,
+			iceServerPass,
+			// End of turn config
 			sharingScalabilityMode,
 			numSimulcastStreams,
 			forceVP8,
@@ -61,6 +67,10 @@ export default class RoomClient {
 		logger.debug(
 			'constructor() [roomId:"%s", peerId:"%s", displayName:"%s", device:%s]',
 			roomId, peerId, displayName, device.flag);
+
+		logger.debug(
+			'Turn [enableIceServer:"%s", iceServerUrl:"%s", iceServerUser:"%s", iceServerPass:%s]',
+			enableIceServer, iceServerUrl, iceServerUser, iceServerPass);
 
 		// Closed flag.
 		// @type {Boolean}
@@ -118,6 +128,25 @@ export default class RoomClient {
 		// Scalability mode for webcam.
 		// @type {String}
 		this._webcamScalabilityMode = webcamScalabilityMode;
+
+		// Try to add turn config
+		// enableIceServer
+		// @type {String}
+		this._enableIceServer = enableIceServer;
+
+		// iceServerUrl
+		// @type {String}
+		this._iceServerUrl = iceServerUrl;
+
+		// iceServerUser
+		// @type {String}
+		this._iceServerUser = iceServerUser;
+
+		// iceServerPass
+		// @type {String}
+		this._iceServerPass = iceServerPass;
+
+		// End of turn config
 
 		// Scalability mode for sharing.
 		// @type {String}
@@ -2095,11 +2124,6 @@ export default class RoomClient {
 			// Create mediasoup Transport for sending (unless we don't want to produce).
 			if (this._produce) {
 
-				let enableIceServer = process.env.MEDIASOUP_CLIENT_ENABLE_ICESERVER
-				let iceServerUrl = process.env.MEDIASOUP_CLIENT_ICESERVER_URL
-				let iceServerUser = process.env.MEDIASOUP_CLIENT_ICESERVER_USER
-				let iceServerPass = process.env.MEDIASOUP_CLIENT_ICESERVER_PASS
-
 				const transportInfo = await this._protoo.request(
 					'createWebRtcTransport',
 					{
@@ -2120,7 +2144,7 @@ export default class RoomClient {
 				} = transportInfo;
 
 
-				if (enableIceServer === 'yes')
+				if (this._enableIceServer === 'yes')
 					this._sendTransport = this._mediasoupDevice.createSendTransport(
 						{
 							id,
@@ -2136,7 +2160,7 @@ export default class RoomClient {
 							},
 							sctpParameters,
 							iceServers: [
-								{ "urls": iceServerUrl, "username": iceServerUser, "credential": iceServerPass }
+								{ "urls": this._iceServerUrl, "username": this._iceServerUser, "credential": this._iceServerPass }
 							],
 							iceTransportPolicy: 'relay',
 							proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
@@ -2236,11 +2260,6 @@ export default class RoomClient {
 			// Create mediasoup Transport for receiving (unless we don't want to consume).
 			if (this._consume) {
 
-				let enableIceServer = process.env.MEDIASOUP_CLIENT_ENABLE_ICESERVER
-				let iceServerUrl = process.env.MEDIASOUP_CLIENT_ICESERVER_URL
-				let iceServerUser = process.env.MEDIASOUP_CLIENT_ICESERVER_USER
-				let iceServerPass = process.env.MEDIASOUP_CLIENT_ICESERVER_PASS
-
 				const transportInfo = await this._protoo.request(
 					'createWebRtcTransport',
 					{
@@ -2260,7 +2279,7 @@ export default class RoomClient {
 					sctpParameters
 				} = transportInfo;
 
-				if (enableIceServer === 'yes')
+				if (this._enableIceServer === 'yes')
 
 					this._recvTransport = this._mediasoupDevice.createRecvTransport(
 						{
@@ -2277,7 +2296,7 @@ export default class RoomClient {
 							},
 							sctpParameters,
 							iceServers: [
-								{ "urls": iceServerUrl, "username": iceServerUser, "credential": iceServerPass }
+								{ "urls": this._iceServerUrl, "username": this._iceServerUser, "credential": this._iceServerPass }
 							],
 							iceTransportPolicy: 'relay',
 							additionalSettings:

@@ -23,7 +23,7 @@ import reducers from './redux/reducers';
 import Room from './components/Room';
 
 const logger = new Logger();
-const reduxMiddlewares = [ thunk ];
+const reduxMiddlewares = [thunk];
 
 // if (process.env.NODE_ENV === 'development')
 // {
@@ -49,8 +49,7 @@ window.STORE = store;
 
 RoomClient.init({ store });
 
-domready(async () =>
-{
+domready(async () => {
 	logger.debug('DOM ready');
 
 	await utils.initialize();
@@ -58,8 +57,7 @@ domready(async () =>
 	run();
 });
 
-async function run()
-{
+async function run() {
 	logger.debug('run() [environment:%s]', process.env.NODE_ENV);
 
 	const urlParser = new UrlParse(window.location.href, true);
@@ -78,6 +76,13 @@ async function run()
 	const enableWebcamLayers = urlParser.query.enableWebcamLayers !== 'false';
 	const enableSharingLayers = urlParser.query.enableSharingLayers !== 'false';
 	const webcamScalabilityMode = urlParser.query.webcamScalabilityMode;
+	// Try to add turn config
+	const enableIceServer = urlParser.query.enableIceServer;
+	const iceServerUrl = urlParser.query.iceServerUrl;
+	const iceServerUser = urlParser.query.iceServerUser;
+	const iceServerPass = urlParser.query.iceServerPass;
+	// End of Turn Config
+
 	const sharingScalabilityMode = urlParser.query.sharingScalabilityMode;
 	const numSimulcastStreams = urlParser.query.numSimulcastStreams ?
 		Number(urlParser.query.numSimulcastStreams) : 3;
@@ -92,20 +97,17 @@ async function run()
 	if (faceDetection)
 		await faceapi.loadTinyFaceDetectorModel('/resources/face-detector-models');
 
-	if (info)
-	{
+	if (info) {
 		// eslint-disable-next-line require-atomic-updates
 		window.SHOW_INFO = true;
 	}
 
-	if (throttleSecret)
-	{
+	if (throttleSecret) {
 		// eslint-disable-next-line require-atomic-updates
 		window.NETWORK_THROTTLE_SECRET = throttleSecret;
 	}
 
-	if (!roomId)
-	{
+	if (!roomId) {
 		roomId = randomString({ length: 8 }).toLowerCase();
 
 		urlParser.query.roomId = roomId;
@@ -115,11 +117,9 @@ async function run()
 	// Get the effective/shareable Room URL.
 	const roomUrlParser = new UrlParse(window.location.href, true);
 
-	for (const key of Object.keys(roomUrlParser.query))
-	{
+	for (const key of Object.keys(roomUrlParser.query)) {
 		// Don't keep some custom params.
-		switch (key)
-		{
+		switch (key) {
 			case 'roomId':
 			case 'handlerName':
 			case 'handler':
@@ -133,6 +133,12 @@ async function run()
 			case 'enableWebcamLayers':
 			case 'enableSharingLayers':
 			case 'webcamScalabilityMode':
+			// Try to add turn config
+			case 'enableIceServer':
+			case 'iceServerUrl':
+			case 'iceServerUser':
+			case 'iceServerPass':
+			// End of turn config
 			case 'sharingScalabilityMode':
 			case 'numSimulcastStreams':
 			case 'info':
@@ -154,13 +160,11 @@ async function run()
 	let displayNameSet;
 
 	// If displayName was provided via URL or Cookie, we are done.
-	if (displayName)
-	{
+	if (displayName) {
 		displayNameSet = true;
 	}
 	// Otherwise pick a random name and mark as "not set".
-	else
-	{
+	else {
 		displayNameSet = false;
 		displayName = randomName();
 	}
@@ -183,7 +187,7 @@ async function run()
 			peerId,
 			displayName,
 			device,
-			handlerName : handlerName,
+			handlerName: handlerName,
 			forceTcp,
 			produce,
 			consume,
@@ -194,6 +198,12 @@ async function run()
 			enableWebcamLayers,
 			enableSharingLayers,
 			webcamScalabilityMode,
+			// Try to add turn config
+			enableIceServer,
+			iceServerUrl,
+			iceServerUser,
+			iceServerPass,
+			// End of  turn config
 			sharingScalabilityMode,
 			numSimulcastStreams,
 			externalVideo,
@@ -219,8 +229,7 @@ async function run()
 
 // NOTE: Debugging stuff.
 
-window.__sendSdps = function()
-{
+window.__sendSdps = function () {
 	logger.warn('>>> send transport local SDP offer:');
 	logger.warn(
 		roomClient._sendTransport._handler._pc.localDescription.sdp);
@@ -230,8 +239,7 @@ window.__sendSdps = function()
 		roomClient._sendTransport._handler._pc.remoteDescription.sdp);
 };
 
-window.__recvSdps = function()
-{
+window.__recvSdps = function () {
 	logger.warn('>>> recv transport remote SDP offer:');
 	logger.warn(
 		roomClient._recvTransport._handler._pc.remoteDescription.sdp);
@@ -243,49 +251,41 @@ window.__recvSdps = function()
 
 let dataChannelTestInterval = null;
 
-window.__startDataChannelTest = function()
-{
+window.__startDataChannelTest = function () {
 	let number = 0;
 
 	const buffer = new ArrayBuffer(32);
 	const view = new DataView(buffer);
 
-	dataChannelTestInterval = window.setInterval(() =>
-	{
-		if (window.DP)
-		{
+	dataChannelTestInterval = window.setInterval(() => {
+		if (window.DP) {
 			view.setUint32(0, number++);
 			roomClient.sendChatMessage(buffer);
 		}
 	}, 100);
 };
 
-window.__stopDataChannelTest = function()
-{
+window.__stopDataChannelTest = function () {
 	window.clearInterval(dataChannelTestInterval);
 
 	const buffer = new ArrayBuffer(32);
 	const view = new DataView(buffer);
 
-	if (window.DP)
-	{
+	if (window.DP) {
 		view.setUint32(0, Math.pow(2, 32) - 1);
 		window.DP.send(buffer);
 	}
 };
 
-window.__testSctp = async function({ timeout = 100, bot = false } = {})
-{
+window.__testSctp = async function ({ timeout = 100, bot = false } = {}) {
 	let dp;
 
-	if (!bot)
-	{
+	if (!bot) {
 		await window.CLIENT.enableChatDataProducer();
 
 		dp = window.CLIENT._chatDataProducer;
 	}
-	else
-	{
+	else {
 		await window.CLIENT.enableBotDataProducer();
 
 		dp = window.CLIENT._botDataProducer;
@@ -297,19 +297,15 @@ window.__testSctp = async function({ timeout = 100, bot = false } = {})
 		dp.sctpStreamParameters.streamId,
 		dp.readyState);
 
-	function send()
-	{
+	function send() {
 		dp.send(`I am streamId ${dp.sctpStreamParameters.streamId}`);
 	}
 
-	if (dp.readyState === 'open')
-	{
+	if (dp.readyState === 'open') {
 		send();
 	}
-	else
-	{
-		dp.on('open', () =>
-		{
+	else {
+		dp.on('open', () => {
 			logger.warn(
 				'<<< testSctp: DataChannel open [streamId:%d]',
 				dp.sctpStreamParameters.streamId);
@@ -321,27 +317,22 @@ window.__testSctp = async function({ timeout = 100, bot = false } = {})
 	setTimeout(() => window.__testSctp({ timeout, bot }), timeout);
 };
 
-setInterval(() =>
-{
-	if (window.CLIENT._sendTransport)
-	{
+setInterval(() => {
+	if (window.CLIENT._sendTransport) {
 		window.H1 = window.CLIENT._sendTransport._handler;
 		window.PC1 = window.CLIENT._sendTransport._handler._pc;
 		window.DP = window.CLIENT._chatDataProducer;
 	}
-	else
-	{
+	else {
 		delete window.PC1;
 		delete window.DP;
 	}
 
-	if (window.CLIENT._recvTransport)
-	{
+	if (window.CLIENT._recvTransport) {
 		window.H2 = window.CLIENT._recvTransport._handler;
 		window.PC2 = window.CLIENT._recvTransport._handler._pc;
 	}
-	else
-	{
+	else {
 		delete window.PC2;
 	}
 }, 2000);
