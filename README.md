@@ -447,7 +447,7 @@ export STUNNERIP=$(kubectl get service udp-gateway -n stunner -o jsonpath='{.sta
 
 ### Mediasoup
 
-- build the container image as documented above but replace the ip in server/Dockerfile with $STUNNERIP
+- build the container image as documented above but replace the ip for MEDIASOUP_CLIENT_ICESERVER_URL in server/Dockerfile with $STUNNERIP
 - create the mediasoup namespace
 
 ```console
