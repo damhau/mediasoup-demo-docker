@@ -375,13 +375,6 @@ helm install stunner stunner/stunner --create-namespace --namespace=stunner
 ```
 
 Configure STUNner to act as a STUN/TURN server to clients, and route all received media to the Mediaserver server pods.
-
-```console
-git clone https://github.com/l7mp/stunner
-cd stunner
-kubectl apply -f docs/examples/livekit/livekit-call-stunner.yaml
-```
-
 Deploy the following resrouce with kubectl apply
 
 ```yaml
