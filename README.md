@@ -8,14 +8,21 @@ You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) o
 ## Table of Content 
 
   * [Table of Content](#table-of-content)
+  * [Important notes](#important-notes)
   * [Pre-requisite](#pre-requisite)
   * [Diagram](#diagram)
   * [Modification](#modification)
   * [How to change the tcp port (Web app and WSS).](#how-to-change-the-tcp-port--web-app-and-wss-)
   * [Docker - How to build](#docker---how-to-build)
   * [Docker - How to run](#docker---how-to-run)
+  * [Docker - How to test](#docker---how-to-test)
   * [Kubernetes - How to run](#kubernetes---how-to-run)
-  * [How to test](#how-to-test)
+    + [Prerequiste](#prerequiste)
+    + [Ingress](#ingress)
+    + [Cert manager](#cert-manager)
+    + [STUNner](#stunner)
+    + [Mediasoup](#mediasoup)
+  * [Kubernetes - How to test](#kubernetes---how-to-test)
 
 ## Important notes
 
