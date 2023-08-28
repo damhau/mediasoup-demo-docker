@@ -1,4 +1,4 @@
-# Mediasoup-demo v3 - Docker and Turn Server
+# Mediasoup-demo v3 - Docker, Kubernetes and Turn Server
 This is a fork of the demo application of [mediasoup](https://mediasoup.org) **v3**.
 
 This fork is containerized and pre-configured to work with a turn server like coturn.
