@@ -63,7 +63,7 @@ ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
 ```
 services:
   mediasoup:
-    image: damienh/mediasoup:v1.31-slim
+    image: mediasoup-demo-docker
     ports:
       - '4443:4443'
   coturn:
@@ -107,7 +107,7 @@ git clone https://github.com/damhau/mediasoup-demo-docker
 vi docker-compose.yml
 services:
   mediasoup:
-    image: damienh/mediasoup:v1.31-slim
+    image: mediasoup-demo-docker
     environment:
       PROTOO_LISTEN_PORT: 4443
     ports:
@@ -150,7 +150,7 @@ docker build . -t mediasoup-demo-docker
 git clone https://github.com/damhau/mediasoup-demo-docker
 cd server
 vi docker-compose.yml
-replace image: damienh/mediasoup:v1.31-slim with your image
+replace image: mediasoup-demo-docker with your image
 ```
 
 - Run docker-compose up in the server folder
@@ -485,7 +485,7 @@ spec:
       - env:
         - name: PROTOO_LISTEN_PORT
           value: "443"
-        image: docker.io/damienh/mediasoup:v1.4.9
+        image: mediasoup-demo-docker
         imagePullPolicy: IfNotPresent
         name: mediasoup-server
         ports:
