@@ -1,6 +1,6 @@
 services:
   mediasoup:
-    image: docker.io/damienh/mediasoup:v1.4.7
+    image: mediasoup-demo-docker
     environment:
       - PROTOO_LISTEN_PORT=4443
       - MEDIASOUP_MIN_PORT=40000
