@@ -112,7 +112,7 @@ services:
       - '4443:4443'
 ```
 
-## How to build
+## Docker - How to build
 
 
 - Clone the repo and change the ip address of the turn server from 100.100.100.100 to your public ip
@@ -140,7 +140,7 @@ docker build . -t mediasoup-demo-docker
 > if the start.sh script fail to detect the container ip you can change the Dockerfile and replace CMD ["sh", "/service/start.sh"] with CMD ["node", "/service/server.js"] and set the variable MEDIASOUP_ANNOUNCED_IP manually
 
 
-## How to run
+## Docker - How to run
 
 - Edit server/docker-compose.yml and udpate the docker image for mediasoup with your own (otherwise it will use my turn server and it will not work)
 
