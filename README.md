@@ -447,7 +447,8 @@ export STUNNERIP=$(kubectl get service udp-gateway -n stunner -o jsonpath='{.sta
 
 ### Mediasoup
 
-- build the container image as documented above but replace the ip for MEDIASOUP_CLIENT_ICESERVER_URL in server/Dockerfile with $STUNNERIP
+- build the container image as documented above and replace the **ip for MEDIASOUP_CLIENT_ICESERVER_URL in server/Dockerfile with $STUNNERIP and change MEDIASOUP_CLIENT_PROTOOPORT=443**
+
 - create the mediasoup namespace
 
 ```console
@@ -528,7 +529,7 @@ spec:
 kubectl -n ingress-nginx get svc 
 NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller-admission   ClusterIP      10.0.23.140    <none>        443/TCP                      6d21h
-ingress-nginx-controller-internal    LoadBalancer   10.0.23.194   100.100.100.101   80:30947/TCP,443:31839/TCP   6d21h
+ingress-nginx-controller             LoadBalancer   10.0.23.194   100.100.100.101   80:30947/TCP,443:31839/TCP   6d21h
 ```
 
 > use the external ip to create you dns entry, eg: mediasoup.yourdomain.com -> A record to 100.100.100.101
