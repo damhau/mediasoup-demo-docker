@@ -1,7 +1,12 @@
 # Mediasoup-demo v3 - Docker and Turn Server
+This is a fork of the demo application of [mediasoup](https://mediasoup.org) **v3**.
 
-## TOC 
-- [Mediasoup-demo v3 - Docker and Turn Server](#mediasoup-demo-v3---docker-and-turn-server)
+This fork is containerized and pre-configured to work with a turn server like coturn.
+
+The goal is to have a version of the demo app that work for the deployment on Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
+
+## Table of Content 
+
   * [Pre-requisite](#pre-requisite)
   * [Diagram](#diagram)
   * [Modification](#modification)
@@ -9,13 +14,6 @@
   * [How to build](#how-to-build)
   * [How to run](#how-to-run)
   * [How to test](#how-to-test)
-
-This is a fork of the demo application of [mediasoup](https://mediasoup.org) **v3**.
-
-This fork is containerized and pre-configured to work with a turn server like coturn.
-
-The goal is to have a version of the demo app that work for the deployment on Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
-
 
 ## Pre-requisite
 
