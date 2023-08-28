@@ -17,6 +17,11 @@ You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) o
   * [Kubernetes - How to run](#kubernetes---how-to-run)
   * [How to test](#how-to-test)
 
+## Important notes
+
+- Currently the mediasoup deployement in Kubernetes support only a single replica, it **CANNOT** be scaled. This is due to the fact that the fowarding of media flow between mutliple instance of mediasoup is not implemented in the demo
+
+
 ## Pre-requisite
 
 - A Linux server with a public ip address (or an EIP on AWS)
