@@ -309,6 +309,34 @@ mediasoup_1  |   }
 mediasoup_1  | }
 ```
 
+## Docker - How to test
+
+> Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the media traffic will be relayed via the public ip of coturn.
+
+- Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
+
+![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/41d8b667-7382-4ecf-b1d8-2179d8328b0c)
+
+
+- Open chrome://webrtc-internals/ in chrome the two webrtc stream should be like this
+
+```
+- ICE connection state: new => completed
+Connection state: new => connected
+Signaling state: new => stable
+ICE Candidate pair: 172.19.0.2:55286 <=> 172.19.0.3:44444
+```
+> The ip address should be the private ip address of the mediasoup and coturn container
+
+- The Ice candidate grid should look like this
+  
+![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/f0e9e518-4dc0-4d50-92d2-048c3cf6698b)
+
+- In the Mediasoup client demo app click on the link **Invitation Link** and open this link from another computer or you mobile phone
+
+- Both device should be in the Room
+
+
 ## Kubernetes - How to run
 
 ### Prerequiste
@@ -567,11 +595,11 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-  name: mediasoup-client
+  name: mediasoup-server
   namespace: mediasoup
 spec:
   rules:
-  - host: mediasoup-demo.yourdomain.com
+  - host: mediasoup.yourdomain.com
     http:
       paths:
       - backend:
@@ -583,16 +611,64 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - mediasoup-demo.yourdomain.com
+    - mediasoup.yourdomain.com
     secretName: mediasoup-demo-tls" | kubectl apply -n mediasoup -f -
 ```
 
+## Kubernetes - How to test
 
-## How to test
+- Check that your mediaserver pod is started
 
-> Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the media traffic will be relayed via the public ip of coturn.
+```console
+kubectl -n mediasoup get pod -o wide
+NAME                               READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES
+mediasoup-server-7bbcd6879-kgsv6   1/1     Running   0          80m   10.80.63.71   aks-nodepool   <none>           <none>
+```
+> Status should be **running**
 
-- Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
+- Review the log of the mediasoup server
+
+```console
+kubectl -n mediasoup logs -l app.kubernetes.io/name --tail=10000
+running mediasoup-demo server.js with ip 10.80.63.71
+process.env.DEBUG: *INFO* *WARN* *ERROR*
+config.js:
+{
+  "https": {
+    "listenIp": "0.0.0.0",
+    "listenPort": "443",
+    "tls": {
+      "cert": "/service/certs/fullchain.pem",
+      "key": "/service/certs/privkey.pem"
+    }
+  },
+```
+> the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod**
+
+- check you mediasoup service
+
+```console
+kubectl -n mediasoup get service mediasoup-server 
+NAME               TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+mediasoup-server   ClusterIP   10.0.47.100   <none>        443/TCP   5d16h
+```
+
+-  check your mediasoup ingress
+
+```console
+kubectl -n mediasoup get ingress mediasoup-server 
+NAME               CLASS    HOSTS                            ADDRESS       PORTS     AGE
+mediasoup-server   <none>   mediasoup.youdomain.com          100.100.100.101   80, 443   5d16h
+```
+
+-  check if certmanager generated a Letencrypt cert for your mediasoup ingress
+
+```console
+kubectl -n mediasoup get certificate
+NAME                 READY   SECRET               AGE
+mediasoup-demo-tls   True    mediasoup-demo-tls   77m
+```
+- Open a brower to https://mediasoup.youdomain.com, you should get the mediasoup client demo app
 
 ![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/41d8b667-7382-4ecf-b1d8-2179d8328b0c)
 
@@ -603,9 +679,9 @@ spec:
 - ICE connection state: new => completed
 Connection state: new => connected
 Signaling state: new => stable
-ICE Candidate pair: 172.19.0.2:55286 <=> 172.19.0.3:44444
+ICE Candidate pair: 10.19.0.2:55286 <=> 10.19.0.3:44444
 ```
-> The ip address should be the private ip address of the mediasoup and coturn container
+> The ip address should be the private ip address of the mediasoup pod and coturn pod
 
 - The Ice candidate grid should look like this
   
