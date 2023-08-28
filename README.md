@@ -335,6 +335,7 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace $NAMESPACE \
   --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
 ```
+:exclamation: The example above is for ngix ingress on AKS if you deploy it on another K8S please remove/change the --set controller.service.annotations
 
 Wait until Kubernetes assigns an external IP to the Ingress.
 
