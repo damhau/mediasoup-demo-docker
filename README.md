@@ -311,6 +311,290 @@ mediasoup_1  | }
 
 ## Kubernetes - How to run
 
+### Prerequiste
+
+- A Kubernetes Cluster with loadbalancer support (AKS, GKE or On premise with MetaLB). I will use Azure AKS in the example but it should work with other.
+- Kubectl
+- Helm
+- Nginx Ingress
+- Cert manager
+- Stunner
+
+### Ingress
+
+The first step of obtaining a valid cert is to install a Kubernetes Ingress: this will be used during the validation of our certificates and to terminate client TLS encrypted contexts.
+
+Install an ingress controller into your cluster. We used the official [nginx ingress](https://github.com/kubernetes/ingress-nginx), but this is not required.
+
+```console
+NAMESPACE=ingress-nginx
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --create-namespace \
+  --namespace $NAMESPACE \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+```
+
+Wait until Kubernetes assigns an external IP to the Ingress.
+
+```console
+until [ -n "$(kubectl -n ingress-nginx get service ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]; do sleep 1; done
+```
+
+### Cert manager
+
+We use the official [cert-manager](https://cert-manager.io) to automate TLS certificate management.
+
+First, install cert-manager's CRDs.
+
+```console
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.crds.yaml
+```
+
+Then add the Helm repository, which contains the cert-manager Helm chart, and install the charts:
+
+```console
+helm repo add cert-manager https://charts.jetstack.io
+helm repo update
+helm install my-cert-manager cert-manager/cert-manager \
+    --create-namespace \
+    --namespace cert-manager \
+    --version v1.8.0
+```
+
+At this point we have all the necessary boilerplate set up to automate TLS issuance for LiveKit.
+
+### STUNner
+
+Install the STUNner gateway operator and STUNner via [Helm](https://github.com/l7mp/stunner-helm):
+
+```console
+helm repo add stunner https://l7mp.io/stunner
+helm repo update
+helm install stunner-gateway-operator stunner/stunner-gateway-operator --create-namespace --namespace=stunner-system
+helm install stunner stunner/stunner --create-namespace --namespace=stunner
+```
+
+Configure STUNner to act as a STUN/TURN server to clients, and route all received media to the Mediaserver server pods.
+
+```console
+git clone https://github.com/l7mp/stunner
+cd stunner
+kubectl apply -f docs/examples/livekit/livekit-call-stunner.yaml
+```
+
+Deploy the following resrouce with kubectl apply
+
+```yaml
+echo 'apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: GatewayClass
+metadata:
+  name: stunner-gatewayclass
+spec:
+  controllerName: "stunner.l7mp.io/gateway-operator"
+  parametersRef:
+    group: "stunner.l7mp.io"
+    kind: GatewayConfig
+    name: stunner-gatewayconfig
+    namespace: stunner
+  description: "STUNner is a WebRTC ingress gateway for Kubernetes"' | kubectl apply -f -
+```
+
+```yaml
+echo 'apiVersion: stunner.l7mp.io/v1alpha1
+kind: GatewayConfig
+metadata:
+  name: stunner-gatewayconfig
+  namespace: stunner
+spec:
+  realm: stunner.l7mp.io
+  authType: plaintext
+  userName: "user-1"
+  password: "pass-1"' | kubectl apply -f -
+```
+
+```yaml
+echo "apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: udp-gateway
+  namespace: stunner
+spec:
+  gatewayClassName: stunner-gatewayclass
+  listeners:
+    - name: udp-listener
+      port: 3478
+      protocol: UDP" | kubectl apply -n stunner -f -
+```
+```yaml
+echo "apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: livekit-media-plane
+  namespace: stunner
+spec:
+  parentRefs:
+    - name: udp-gateway
+  rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: mediasoup-server
+        namespace: mediasoup" | kubectl apply -n stunner -f -
+```
+
+Once the Gateway resource is installed into Kubernetes, STUNner will create a Kubernetes LoadBalancer for the Gateway to expose the TURN server on UDP:3478 to clients. It can take up to a minute for Kubernetes to allocate a public external IP for the service.
+
+Wait until Kubernetes assigns an external IP and store the external IP assigned by Kubernetes to
+STUNner in an environment variable for later use.
+
+```console
+until [ -n "$(kubectl get svc udp-gateway -n stunner -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]; do sleep 1; done
+export STUNNERIP=$(kubectl get service udp-gateway -n stunner -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
+
+### Mediasoup
+
+- build the container image as documented above but replace the ip in server/Dockerfile with $STUNNERIP
+- create the mediasoup namespace
+
+```console
+kubectl create namespace mediasoup
+```
+ 
+- deploy mediasoup on Kubernetes
+
+```yaml
+echo "kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: mediasoup-server
+  name: mediasoup-server
+  namespace: mediasoup
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mediasoup-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mediasoup-server
+    spec:
+      containers:
+      - env:
+        - name: PROTOO_LISTEN_PORT
+          value: "443"
+        image: docker.io/damienh/mediasoup:v1.4.9
+        imagePullPolicy: IfNotPresent
+        name: mediasoup-server
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30" | kubectl apply -n mediasoup -f -
+```
+- create mediasoup service on Kubernetes
+
+```yaml
+echo "apiVersion: v1
+kind: Service
+metadata:
+  name: mediasoup-server
+  namespace: mediasoup
+spec:
+  ports:
+  - name: https-443
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app.kubernetes.io/name: mediasoup-server
+  type: ClusterIP" | kubectl apply -n mediasoup -f -
+```
+
+- Create a dns entry for mediasoup that point to the public ip address of nginx ingress
+  
+```
+kubectl -n ingress-nginx get svc 
+NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller-admission   ClusterIP      10.0.23.140    <none>        443/TCP                      6d21h
+ingress-nginx-controller-internal    LoadBalancer   10.0.23.194   100.100.100.101   80:30947/TCP,443:31839/TCP   6d21h
+```
+
+> use the external ip to create you dns entry, eg: mediasoup.yourdomain.com -> A record to 100.100.100.101
+
+- Create a clusterissuer to automate the certificate for you ingress
+
+```yaml
+echo "apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  generation: 1
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: info@yourdomain.com
+    privateKeySecretRef:
+      name: letsencrypt-secret-prod
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: nginx" | kubectl apply -f -
+```
+
+- Create an ingress for mediasoup
+
+```yaml
+echo "apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  name: mediasoup-client
+  namespace: mediasoup
+spec:
+  rules:
+  - host: mediasoup-demo.yourdomain.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: mediasoup-server
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - mediasoup-demo.yourdomain.com
+    secretName: mediasoup-demo-tls" | kubectl apply -n mediasoup -f -
+```
+
+
 ## How to test
 
 > Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the media traffic will be relayed via the public ip of coturn.
