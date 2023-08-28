@@ -3,7 +3,7 @@ This is a fork of the demo application of [mediasoup](https://mediasoup.org) **v
 
 This fork is containerized and pre-configured to work with a turn server like coturn.
 
-The goal is to have a version of the demo app that work for the deployment on Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
+You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) or in Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
 
 ## Table of Content 
 
@@ -306,6 +306,8 @@ mediasoup_1  |     }
 mediasoup_1  |   }
 mediasoup_1  | }
 ```
+
+## Kubernetes - How to run
 
 ## How to test
 
