@@ -7,18 +7,18 @@ This fork is containerized and pre-configured to work with a turn server like co
 The goal is to have a version of the demo app that work for the deployment on Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
 
 
-## Pre-requisite
+# Pre-requisite
 
 - A Linux server with a public ip address (or an EIP on AWS)
 - Docker and Docker Compose
 - A turn server running in a container with port 3478 forwarded from the public ip (this is configured in docker)
 - A mediasoup server running in a container with port 4443 forwarded from the public ip (this is configured in docker)
 
-## Diagram
+# Diagram
 
 ![Alt text](docs/image.png)
 
-## Modification
+# Modification
 
 Below are the modification that I've done starting from [mediasoup-demo](https://github.com/versatica/mediasoup-demo/) 
 
