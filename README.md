@@ -322,8 +322,6 @@ mediasoup_1  | }
 
 ### Ingress
 
-The first step of obtaining a valid cert is to install a Kubernetes Ingress: this will be used during the validation of our certificates and to terminate client TLS encrypted contexts.
-
 Install an ingress controller into your cluster. We used the official [nginx ingress](https://github.com/kubernetes/ingress-nginx), but this is not required.
 
 ```console
@@ -364,8 +362,6 @@ helm install my-cert-manager cert-manager/cert-manager \
     --namespace cert-manager \
     --version v1.8.0
 ```
-
-At this point we have all the necessary boilerplate set up to automate TLS issuance for LiveKit.
 
 ### STUNner
 
