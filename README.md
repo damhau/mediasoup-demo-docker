@@ -658,8 +658,8 @@ config.js:
 > the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod** if this is not the case the start.sh script of the docker image was not able to "detec" the ip address of the pod
 
 - if the pod ip is not detected when mediasoup server start you can try the following:
-  - Edit /server/start.sh and comment line 3 and 5
-  - Edit you mediasoup kubernetes deployment replace it with the follwoing
+  - Edit /server/start.sh and comment line 3 and 5 and **rebuild the docker image**
+  - Edit you mediasoup kubernetes deployment replace it with the follwoing, the important bit is **valueFrom** which will set the env var MEDIASOUP_ANNOUNCED_IP with the ip address of the pod
  
     ```yaml
     echo "kind: Deployment
