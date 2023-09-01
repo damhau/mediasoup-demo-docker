@@ -655,7 +655,7 @@ config.js:
     }
   },
 ```
-> the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod**
+> the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod** if this is not the case the start.sh script of the docker image was not able to "detec" the ip address of the pod
 
 - check you mediasoup service
 
