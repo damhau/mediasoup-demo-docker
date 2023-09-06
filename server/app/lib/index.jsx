@@ -78,7 +78,9 @@ async function run() {
 	const webcamScalabilityMode = urlParser.query.webcamScalabilityMode;
 	// Try to add turn config
 	const enableIceServer = urlParser.query.enableIceServer;
-	const iceServerUrl = urlParser.query.iceServerUrl;
+	const iceServerHost = urlParser.query.iceServerHost;
+	const iceServerProto = urlParser.query.iceServerProto;
+	const iceServerPort = urlParser.query.iceServerPort;
 	const iceServerUser = urlParser.query.iceServerUser;
 	const iceServerPass = urlParser.query.iceServerPass;
 	// End of Turn Config
@@ -135,7 +137,9 @@ async function run() {
 			case 'webcamScalabilityMode':
 			// Try to add turn config
 			case 'enableIceServer':
-			case 'iceServerUrl':
+			case 'iceServerHost':
+			case 'iceServerProto':
+			case 'iceServerPort':
 			case 'iceServerUser':
 			case 'iceServerPass':
 			// End of turn config
@@ -200,7 +204,9 @@ async function run() {
 			webcamScalabilityMode,
 			// Try to add turn config
 			enableIceServer,
-			iceServerUrl,
+			iceServerHost,
+			iceServerProto,
+			iceServerPort,
 			iceServerUser,
 			iceServerPass,
 			// End of  turn config

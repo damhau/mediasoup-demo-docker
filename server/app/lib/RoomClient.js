@@ -50,7 +50,9 @@ export default class RoomClient {
 			webcamScalabilityMode,
 			// Try to add turn config
 			enableIceServer,
-			iceServerUrl,
+			iceServerHost,
+			iceServerProto,
+			iceServerPort,
 			iceServerUser,
 			iceServerPass,
 			// End of turn config
@@ -69,8 +71,8 @@ export default class RoomClient {
 			roomId, peerId, displayName, device.flag);
 
 		logger.debug(
-			'Turn [enableIceServer:"%s", iceServerUrl:"%s", iceServerUser:"%s", iceServerPass:%s]',
-			enableIceServer, iceServerUrl, iceServerUser, iceServerPass);
+			'Turn [enableIceServer:"%s", iceServerHost:"%s", iceServerProto:"%s", iceServerPort:"%s", iceServerUser:"%s", iceServerPass:"%s"]',
+			enableIceServer, iceServerHost, iceServerProto, iceServerPort, iceServerUser, iceServerPass);
 
 		// Closed flag.
 		// @type {Boolean}
@@ -134,9 +136,17 @@ export default class RoomClient {
 		// @type {String}
 		this._enableIceServer = enableIceServer;
 
-		// iceServerUrl
+		// iceServerHost
 		// @type {String}
-		this._iceServerUrl = iceServerUrl;
+		this._iceServerHost = iceServerHost;
+
+		// iceServerProto
+		// @type {String}
+		this._iceServerProto = iceServerProto;
+
+		// iceServerPort
+		// @type {String}
+		this._iceServerPort = iceServerPort;
 
 		// iceServerUser
 		// @type {String}
@@ -2160,7 +2170,7 @@ export default class RoomClient {
 							},
 							sctpParameters,
 							iceServers: [
-								{ "urls": this._iceServerUrl, "username": this._iceServerUser, "credential": this._iceServerPass }
+								{ "urls": "turn:" + this._iceServerHost + ":" + this._iceServerPort + "?transport=" + this._iceServerProto, "username": this._iceServerUser, "credential": this._iceServerPass }
 							],
 							iceTransportPolicy: 'relay',
 							proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS,
@@ -2296,7 +2306,7 @@ export default class RoomClient {
 							},
 							sctpParameters,
 							iceServers: [
-								{ "urls": this._iceServerUrl, "username": this._iceServerUser, "credential": this._iceServerPass }
+								{ "urls": "turn:" + this._iceServerHost + ":" + this._iceServerPort + "?transport=" + this._iceServerProto, "username": this._iceServerUser, "credential": this._iceServerPass }
 							],
 							iceTransportPolicy: 'relay',
 							additionalSettings:
