@@ -60,7 +60,7 @@ services:
   mediasoup:
     image: mediasoup-demo-docker
     ports:
-      - '4443:4443'
+      - '443:443'
   coturn:
     image: coturn/coturn
     command: -n --log-file=stdout --lt-cred-mech --fingerprint --no-multicast-peers --no-cli --no-tlsv1 --no-tlsv1_1 --realm=my.realm.org --user user:pass -v
@@ -69,7 +69,7 @@ services:
       - "3478:3478/udp"
 ```
 
-> As you can see there only port 4443 is "open" for Mediasoup and port 3478 for Coturn. This mean that all the webrtc media traffic is over udp 3478. This is a pre-requiste to be able to run this on Kubernetes without network=host and with a turn server like stunner.
+> As you can see there only port 443 is "open" for Mediasoup and port 3478 for Coturn. This mean that all the webrtc media traffic is over udp 3478. This is a pre-requiste to be able to run this on Kubernetes without network=host and with a turn server like stunner.
 
 
 - Added a cert folder with self signed demo certificate in server/certs 
@@ -86,17 +86,17 @@ For the server, the port configured in server/config.js with the environement va
 
 In the client code (server/app/lib/urlFactory.js) there is a variable called protooPort that can only be changed before building the mediasoup-client files.
 
-- Change the port for the mediasoup-client (used for the WSS requests), replace 4443 with the port you want to use (for a "real" deplyonent it should be 443)
+- Change the port for the mediasoup-client (used for the WSS requests), replace 443 with the port you want to use (if you want to be able to run this demo as is you should keep port 443)
 ```
 git clone https://github.com/damhau/mediasoup-demo-docker
 vi server/Dockerfile
-ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
+ENV MEDIASOUP_CLIENT_PROTOOPORT=443
 ```
 
 :exclamation: if you change this you have to rebuild the docker image
 
 
-- Change the port for the mediasoup-server, replace 4443 with the port you want to use
+- Change the port for the mediasoup-server, replace 443 with the port you want to use
 ```
 git clone https://github.com/damhau/mediasoup-demo-docker
 vi docker-compose.yml
@@ -104,9 +104,9 @@ services:
   mediasoup:
     image: mediasoup-demo-docker
     environment:
-      PROTOO_LISTEN_PORT: 4443
+      PROTOO_LISTEN_PORT: 443
     ports:
-      - '4443:4443'
+      - '443:443'
 ```
 
 ## Docker - How to build
