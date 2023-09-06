@@ -24,11 +24,6 @@ You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) o
     + [Mediasoup](#mediasoup)
   * [Kubernetes - How to test](#kubernetes---how-to-test)
 
-## Important notes
-
-- Currently the mediasoup deployement in Kubernetes support only a single replica, it **CANNOT** be scaled. This is due to the fact that the fowarding of media flow between mutliple instance of mediasoup is not implemented in the demo
-
-
 ## Pre-requisite
 
 - A Linux server with a public ip address (or an EIP on AWS)
@@ -58,18 +53,8 @@ Below are the modification that I've done starting from [mediasoup-demo](https:/
 147:	expressApp.use(express.static('public'))
 ```
 
-- added a simple if/else in server/app/lib/RoomClient.js to configure a turn server. The turn server will be used by the mediasoup client when when the following varaibles are configured in the Dockerfile stage 0.
+- added the parsing of url parameters to cofnigure turn server and a simple if/else in server/app/lib/RoomClient.js. The turn server will be used by the mediasoup client whe the url has the turn argument. Example: https://mediasoup-demo.example.com/?enableIceServer=yes&iceServerHost=100.100.100.100&iceServerPort=3478&iceServerProto=udp&iceServerUser=user-1&iceServerPass=pass-1
   
-```
-ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
-ENV MEDIASOUP_CLIENT_ENABLE_ICESERVER=yes
-ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:100.100.100.100:3478?transport=udp
-ENV MEDIASOUP_CLIENT_ICESERVER_USER=user
-ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
-```
-
-> the variable are replaced in the .js when the command gulp dist is executed, the config of gulp is in server/app/gulpfile.js line 97 to 103. After the variable are replaced in the .js file they are bundled and stored in the folder /service/public in the stage 1 docker build.
-
 - added a sample docker-compose file that start mediasoup and coturn
 
 ```
@@ -129,20 +114,7 @@ services:
 ## Docker - How to build
 
 
-- Clone the repo and change the ip address of the turn server from 100.100.100.100 to your public ip
-
-```
-git clone https://github.com/damhau/mediasoup-demo-docker
-vi server/Dockerfile
-
-ENV MEDIASOUP_CLIENT_ENABLE_ICESERVER=yes
-ENV MEDIASOUP_CLIENT_ICESERVER_URL=turn:100.100.100.100:3478?transport=udp
-ENV MEDIASOUP_CLIENT_ICESERVER_USER=user
-ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass
-```
-
-> if you don't want to enable turn juste remove the 4 line
-
+- Clone the repo
 - Run docker build in the server folder
 
 ```
@@ -152,7 +124,6 @@ docker build . -t mediasoup-demo-docker
 ```
 
 > if the start.sh script fail to detect the container ip you can change the Dockerfile and replace CMD ["sh", "/service/start.sh"] with CMD ["node", "/service/server.js"] and set the variable MEDIASOUP_ANNOUNCED_IP manually
-
 
 ## Docker - How to run
 
@@ -325,11 +296,12 @@ mediasoup_1  | }
 
 > Check that announcedIp is the ip "inside" of the mediasoup container, it should not be the public ip as all the media traffic will be relayed via the public ip of coturn.
 
-- Open a brower to https://you_public_ip:4443, you should get the mediasoup client demo app
-
-![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/41d8b667-7382-4ecf-b1d8-2179d8328b0c)
-
-
+- Open a brower to https://you_public_ip:4443?enableIceServer=yes&iceServerHost=100.100.100.100&iceServerPort=3478&iceServerProto=udp&iceServerUser=user-1&iceServerPass=pass-1, you should get the mediasoup client demo app
+  - replace 100.100.100.100 with the public ip of your turn server
+  - replace 3478 with the port of your turn server
+  - replace udp with the protocal of your turn server
+  - replace user-1 and pass-1 with the user and pass of your turn server
+    
 - Open chrome://webrtc-internals/ in chrome the two webrtc stream should be like this
 
 ```
@@ -489,8 +461,6 @@ export STUNNERIP=$(kubectl get service udp-gateway -n stunner -o jsonpath='{.sta
 ### Mediasoup
 
 - build the container image as documented above and
-  - replace the **ip for MEDIASOUP_CLIENT_ICESERVER_URL in server/Dockerfile with $STUNNERIP and change MEDIASOUP_CLIENT_PROTOOPORT=443**
-  - repalce ENV MEDIASOUP_CLIENT_ICESERVER_USER=user-1 and ENV MEDIASOUP_CLIENT_ICESERVER_PASS=pass-1 with the user/pass you have configured for Stunner
 
 - create the mediasoup namespace
 
@@ -607,6 +577,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_roomId"
   name: mediasoup-server
   namespace: mediasoup
 spec:
@@ -626,6 +597,7 @@ spec:
     - mediasoup.yourdomain.com
     secretName: mediasoup-demo-tls" | kubectl apply -n mediasoup -f -
 ```
+> The annotation nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_roomId" allow to scale the media server by increasing the number of replica of the deploymynet, the configure nginx to send the client in the same room to the same media server pod.
 
 ## Kubernetes - How to test
 
@@ -737,10 +709,11 @@ kubectl -n mediasoup get certificate
 NAME                 READY   SECRET               AGE
 mediasoup-demo-tls   True    mediasoup-demo-tls   77m
 ```
-- Open a brower to https://mediasoup.youdomain.com, you should get the mediasoup client demo app
-
-![image](https://github.com/damhau/mediasoup-demo-docker/assets/14148364/41d8b667-7382-4ecf-b1d8-2179d8328b0c)
-
+- Open a brower to https://you_public_ip:4443?enableIceServer=yes&iceServerHost=100.100.100.100&iceServerPort=3478&iceServerProto=udp&iceServerUser=user-1&iceServerPass=pass-1, you should get the mediasoup client demo app
+  - replace 100.100.100.100 with the public ip of your turn server
+  - replace 3478 with the port of your turn server
+  - replace udp with the protocal of your turn server
+  - replace user-1 and pass-1 with the user and pass of your turn server
 
 - Open chrome://webrtc-internals/ in chrome the two webrtc stream should be like this
 
