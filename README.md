@@ -330,6 +330,10 @@ ICE Candidate pair: 172.19.0.2:55286 <=> 172.19.0.3:44444
 - Cert manager
 - Stunner
 
+### Container image
+
+- Build the mediasoup demo image like document above.
+
 ### Ingress
 
 Install an ingress controller into your cluster. We used the official [nginx ingress](https://github.com/kubernetes/ingress-nginx), but this is not required.
