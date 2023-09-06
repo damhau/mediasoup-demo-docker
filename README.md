@@ -96,7 +96,7 @@ ENV MEDIASOUP_CLIENT_PROTOOPORT=4443
 :exclamation: if you change this you have to rebuild the docker image
 
 
-- Change the port for the mediasoup-server, replace 4443 with the port you want to use (for a "real" deplyonent it should be 443)
+- Change the port for the mediasoup-server, replace 4443 with the port you want to use
 ```
 git clone https://github.com/damhau/mediasoup-demo-docker
 vi docker-compose.yml
