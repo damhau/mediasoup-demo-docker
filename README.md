@@ -21,6 +21,7 @@ You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) o
     + [STUNner](#stunner)
     + [Mediasoup](#mediasoup)
   * [Kubernetes - How to test](#kubernetes---how-to-test)
+  * [Improvement](#Improvement)
 
 ## Pre-requisite
 
@@ -735,5 +736,8 @@ ICE Candidate pair: 10.19.0.2:55286 <=> 10.19.0.3:44444
 
 - Both device should be in the Room
 
+# Improvement
 
+- Add an config example with a turn server with TLS on port 443
+- Add a simple api on the mediasoup server to provide the turn config for the client
 
