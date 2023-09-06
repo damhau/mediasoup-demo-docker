@@ -655,7 +655,64 @@ config.js:
     }
   },
 ```
-> the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod**
+> the ip after "running mediasoup-demo server.js with ip" **should be the ip of the mediaserver pod** if this is not the case the start.sh script of the docker image was not able to "detec" the ip address of the pod
+
+- if the pod ip is not detected when mediasoup server start you can try the following:
+  - Edit /server/start.sh and comment line 3 and 5 and **rebuild the docker image**
+  - Edit you mediasoup kubernetes deployment replace it with the follwoing, the important bit is **valueFrom** which will set the env var MEDIASOUP_ANNOUNCED_IP with the ip address of the pod
+ 
+    ```yaml
+    echo "kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/name: mediasoup-server
+      name: mediasoup-server
+      namespace: mediasoup
+    spec:
+      progressDeadlineSeconds: 600
+      replicas: 1
+      revisionHistoryLimit: 10
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: mediasoup-server
+      strategy:
+        rollingUpdate:
+          maxSurge: 25%
+          maxUnavailable: 25%
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: mediasoup-server
+        spec:
+          containers:
+          - env:
+            - name: PROTOO_LISTEN_PORT
+              value: "443"
+            - name: MEDIASOUP_ANNOUNCED_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            image: mediasoup-demo-docker
+            imagePullPolicy: IfNotPresent
+            name: mediasoup-server
+            ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 443
+              name: https
+              protocol: TCP
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30" | kubectl apply -n mediasoup -f -
+    ```
 
 - check you mediasoup service
 
