@@ -5,10 +5,8 @@ This fork is containerized and pre-configured to work with a turn server like co
 
 You can run the demo in Docker with [coturn](https://github.com/coturn/coturn) or in Kubernetes with [stunner](https://github.com/l7mp/stunner) as turn server.
 
-Table of Content 
+## Table of Content 
 
-  * [Table of Content](#table-of-content)
-  * [Important notes](#important-notes)
   * [Pre-requisite](#pre-requisite)
   * [Diagram](#diagram)
   * [Modification](#modification)
